@@ -29,7 +29,7 @@ namespace DatingAppBack
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
-            // Add configuration for DbContext
+            // (dnl) Add configuration for DbContext
             // Use connection string from appsettings.json file
             services.AddDbContext<DataContext>(options =>
             {
