@@ -4,10 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using DatingAppBack.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace DatingAppBack.Controllers
 {   
-    //main route http://localhost:44340/api/values
+    //main route from iis express http://localhost:44340/api/values
     [Route("api/[controller]")]
     [ApiController]
     public class ValuesController : ControllerBase
@@ -23,17 +24,17 @@ namespace DatingAppBack.Controllers
 
         // GET api/values
         [HttpGet]
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
-            var values = this.context.Values.ToList();
+            var values = await this.context.Values.ToListAsync();
             return Ok(values);
         }
 
         // GET api/values/5
         [HttpGet("{id}")]
-        public IActionResult GetValue(int id)
+        public async Task<IActionResult> GetValue(int id)
         {
-            var value = this.context.Values.FirstOrDefault(x => x.Id == id);
+            var value = await this.context.Values.FirstOrDefaultAsync(x => x.Id == id);
             return Ok(value);
         }
 
