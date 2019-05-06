@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using DatingAppBack.Data;
+using DatingAppBack.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,14 +21,15 @@ namespace DatingAppBack.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(string username, string password)
+        public async Task<IActionResult> Register(UserForRegisterDto userForRegisterDto )
         {
-            username = username.ToLower();
-            if (await this.repo.UserExists(username))
-                return BadRequest(new { message = $"User: {username} is already taken" });
-            var userToCreate = new User { Username = username };
+            userForRegisterDto.Username = userForRegisterDto.Username.ToLower();
+            if (await this.repo.UserExists(userForRegisterDto.Username))
+                return BadRequest(new { message = $"User: {userForRegisterDto.Username} is already taken" });
 
-            var createdUser = await this.repo.Register(userToCreate, password);
+            var userToCreate = new User { Username = userForRegisterDto.Username };
+
+            var createdUser = await this.repo.Register(userToCreate, userForRegisterDto.Password);
 
             return StatusCode(201);
         }
