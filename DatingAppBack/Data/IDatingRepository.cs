@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DatingAppBack.Data
 {
-    interface IDatingRepository
+    public interface IDatingRepository
     {
         void Add<T>(T entity) where T : class;
         void Delete<T>(T entity) where T : class;
