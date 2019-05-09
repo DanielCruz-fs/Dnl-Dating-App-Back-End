@@ -43,9 +43,9 @@ namespace DatingAppBack
             services.AddCors();
             //add seed class as a service
             services.AddTransient<Seed>();
-
+            //Repository patterns as services
             services.AddScoped<IAuthRepository, AuthRepository>();
-
+            services.AddScoped<IDatingRepository, DatingRepository>();
             //Authentication middleware dnl
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     .AddJwtBearer(options =>
