@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace DatingAppBack.Controllers
@@ -38,6 +39,25 @@ namespace DatingAppBack.Controllers
             var user = await this.repo.GetUser(id);
             var userToReturn = this.mapper.Map<UserForDetailedDto>(user);
             return Ok(userToReturn);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUser(int id, UserForUpdateDto userForUpdateDto)
+        {
+            /*
+             * We have access to the User object via the http context (as the user sends up a token)
+             * and this contains details about the users claims.
+             */
+            if (id != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
+                return Unauthorized();
+
+            var userFromRepo = await this.repo.GetUser(id);
+            this.mapper.Map(userForUpdateDto, userFromRepo);
+
+            if (await this.repo.SaveAll())
+                return Ok(userForUpdateDto);
+
+            throw new Exception($"Updating user: {id} failed on save.");
         }
     }
 }
