@@ -11,6 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using System.IdentityModel.Tokens.Jwt;
+using AutoMapper;
 
 namespace DatingAppBack.Controllers
 {   
@@ -20,11 +21,13 @@ namespace DatingAppBack.Controllers
     {
         private readonly IAuthRepository repo;
         private readonly IConfiguration config;
+        private readonly IMapper mapper;
 
-        public AuthController(IAuthRepository repo, IConfiguration config)
+        public AuthController(IAuthRepository repo, IConfiguration config, IMapper mapper)
         {
             this.repo = repo;
             this.config = config;
+            this.mapper = mapper;
         }
 
         [HttpPost("register")]
@@ -69,7 +72,13 @@ namespace DatingAppBack.Controllers
             //THE Token
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
-            return Ok(new { token = tokenHandler.WriteToken(token) });
+            //user info state of user in SPA
+            var user = this.mapper.Map<UserForListDto>(userFromRepo);
+
+            return Ok(new {
+                            token = tokenHandler.WriteToken(token),
+                            user
+                          });
         }
     }
 }
