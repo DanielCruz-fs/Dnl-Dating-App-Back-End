@@ -52,9 +52,10 @@ namespace DatingAppBack
             services.AddAutoMapper();
             //add seed class as a service
             services.AddTransient<Seed>();
-            //Repository patterns as services
+            //Repository patterns as services (creates an instance per connection)
             services.AddScoped<IAuthRepository, AuthRepository>();
             services.AddScoped<IDatingRepository, DatingRepository>();
+            services.AddScoped<LogUserActivity>();
             //Authentication middleware dnl
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                     .AddJwtBearer(options =>
