@@ -28,11 +28,24 @@ namespace DatingAppBack.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetUsers()
+        public async Task<IActionResult> GetUsers([FromQuery]UserParams userParams)
         {
-            var users = await this.repo.GetUsers();
+            var users = await this.repo.GetUsers(userParams);
             var usersToReturn = this.mapper.Map<IEnumerable<UserForListDto>>(users);
-            return Ok(usersToReturn);
+            //one way to show details for pagination (headers)
+            Response.AddPagination(users.CurrentPage, users.PageSize, users.TotalCount, users.TotalPages);
+            
+            //Clean way to return data without pagination details
+            //return Ok(usersToReturn);
+
+            //i like this way better though
+            return Ok( new {
+                             currentPage = users.CurrentPage,
+                             pageSize = users.PageSize,
+                             totalCount = users.TotalCount,
+                             totalPages = users.TotalPages,
+                             users = usersToReturn
+                           });
         }
 
         [HttpGet("{id}", Name ="GetUser")]

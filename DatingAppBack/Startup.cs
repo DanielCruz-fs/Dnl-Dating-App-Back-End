@@ -52,7 +52,7 @@ namespace DatingAppBack
             services.AddAutoMapper();
             //add seed class as a service
             services.AddTransient<Seed>();
-            //Repository patterns as services (creates an instance per connection)
+            //Repository patterns as services (creates an instance per request)
             services.AddScoped<IAuthRepository, AuthRepository>();
             services.AddScoped<IDatingRepository, DatingRepository>();
             services.AddScoped<LogUserActivity>();
