@@ -2,6 +2,7 @@
 using DatingAppBack.Data;
 using DatingAppBack.Dtos;
 using DatingAppBack.Helpers;
+using DatingAppBack.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -82,5 +83,28 @@ namespace DatingAppBack.Controllers
 
             throw new Exception($"Updating user: {id} failed on save.");
         }
+
+        [HttpPost("{id}/like/{recipientId}")]
+        public async Task<IActionResult> LikeUser(int id, int recipientId)
+        {
+            if (id != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
+                return Unauthorized();
+
+            var like = await this.repo.GetLike(id, recipientId);
+
+            if (like != null)
+                return BadRequest("already like this user");
+            if (await this.repo.GetUser(recipientId) == null)
+                return NotFound();
+
+            like = new Like() { LikerId = id, LikeeId = recipientId };
+
+            this.repo.Add<Like>(like);
+            if (await this.repo.SaveAll())
+                return Ok(like);
+
+            return BadRequest("failed to like user");
+
+        } 
     }
 }
