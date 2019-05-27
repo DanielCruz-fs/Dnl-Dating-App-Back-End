@@ -40,6 +40,27 @@ namespace DatingAppBack.Controllers
             return Ok(messageFromRepo);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetMessages(int userId, MessageParams messageParams)
+        {
+            if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
+                return Unauthorized();
+
+            messageParams.UserId = userId;
+            var messagesFromRepo = await this.repo.GetMessagesForUser(messageParams);
+
+            var messagesToReturn = this.mapper.Map<IEnumerable<MessageToReturnDto>>(messagesFromRepo);
+
+            return Ok(new
+            {
+                currentPage = messagesFromRepo.CurrentPage,
+                pageSize = messagesFromRepo.PageSize,
+                totalCount = messagesFromRepo.TotalCount,
+                totalPages = messagesFromRepo.TotalPages,
+                messages = messagesToReturn
+            });
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateMessage(int userId, MessageForCreationDto messageForCreationDto)
         {
