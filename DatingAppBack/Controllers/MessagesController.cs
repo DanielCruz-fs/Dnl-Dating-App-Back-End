@@ -105,5 +105,42 @@ namespace DatingAppBack.Controllers
 
             throw new Exception("Creating the message failed.");
         }
+
+        [HttpPost("{id}")]
+        public async Task<IActionResult> DeleteMessage(int id, int userId)
+        {
+            if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
+                return Unauthorized();
+
+            var messageFromRepo = await this.repo.GetMessage(id);
+
+            if (messageFromRepo.SenderId == userId)
+                messageFromRepo.SenderDeleted = true;
+            if (messageFromRepo.RecipientId == userId)
+                messageFromRepo.RecipientDeleted = true;
+
+            if (messageFromRepo.SenderDeleted && messageFromRepo.RecipientDeleted)
+                this.repo.Delete(messageFromRepo);
+            if (await this.repo.SaveAll())
+                return Ok();
+            throw new Exception("Error deleting message.");
+        }
+
+        [HttpPost("{id}/read")]
+        public async Task<IActionResult> MarkAsRead(int userId, int id)
+        {
+            if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
+                return Unauthorized();
+            var message = await this.repo.GetMessage(id);
+
+            if (message.RecipientId != userId)
+                return Unauthorized();
+
+            message.IsRead = true;
+            message.DateRead = DateTime.Now;
+
+            await this.repo.SaveAll();
+            return Ok();
+        }
     }
 }

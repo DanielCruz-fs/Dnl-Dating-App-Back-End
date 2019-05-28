@@ -126,13 +126,16 @@ namespace DatingAppBack.Data
             switch (messageParams.MessageContainer)
             {
                 case "Inbox":
-                    messages = messages.Where(m => m.RecipientId == messageParams.UserId);
+                    messages = messages.Where(m => m.RecipientId == messageParams.UserId &&
+                                              m.RecipientDeleted == false);
                     break;
                 case "Outbox":
-                    messages = messages.Where(m => m.SenderId == messageParams.UserId);
+                    messages = messages.Where(m => m.SenderId == messageParams.UserId &&
+                                              m.SenderDeleted == false);
                     break;
                 default:
-                    messages = messages.Where(m => m.RecipientId == messageParams.UserId && m.IsRead == false);
+                    messages = messages.Where(m => m.RecipientId == messageParams.UserId && m.IsRead == false &&
+                                              m.RecipientDeleted == false);
                     break;
             }
 
@@ -144,8 +147,10 @@ namespace DatingAppBack.Data
         {
             var messages = await this.context.Messages.Include(m => m.Sender).ThenInclude(p => p.Photos)
                                                 .Include(m => m.Recipient).ThenInclude(p => p.Photos)
-                                                .Where(m => m.SenderId == userId && m.RecipientId == recipientId
-                                                      || m.SenderId == recipientId && m.RecipientId == userId)
+                                                .Where(m => m.SenderId == userId && m.RecipientId == recipientId &&
+                                                       m.RecipientDeleted == false
+                                                      || m.SenderId == recipientId && m.RecipientId == userId &&
+                                                       m.SenderDeleted == false)
                                                 .OrderByDescending(m => m.MessageSent)
                                                 .ToListAsync();
             return messages;
