@@ -41,7 +41,7 @@ namespace DatingAppBack.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetMessages(int userId, MessageParams messageParams)
+        public async Task<IActionResult> GetMessages(int userId, [FromQuery]MessageParams messageParams)
         {
             if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
                 return Unauthorized();
@@ -77,9 +77,13 @@ namespace DatingAppBack.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateMessage(int userId, MessageForCreationDto messageForCreationDto)
         {
-            if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
+            //fetch the sender for dto automapper magic
+            var sender = await this.repo.GetUser(userId);
+            if (sender.Id != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
                 return Unauthorized();
+
             messageForCreationDto.SenderId = userId;
+            //fetch the sender for dto automapper magic
             var recipient = await this.repo.GetUser(messageForCreationDto.RecipientId);
 
             if (recipient == null)
@@ -88,10 +92,16 @@ namespace DatingAppBack.Controllers
 
             this.repo.Add(message);
 
-            var messageToReturn = this.mapper.Map<MessageForCreationDto>(message); 
 
             if (await this.repo.SaveAll())
+            {
+                // Automapper automatically includes senser and recipient properties to MessageToReturnDto
+                // 'cause they are still in memory
+                //we map here to get and return the real id from sql
+                var messageToReturn = this.mapper.Map<MessageToReturnDto>(message); 
+
                 return CreatedAtRoute("GetMessage", new { id = message.Id }, messageToReturn);
+            }
 
             throw new Exception("Creating the message failed.");
         }
